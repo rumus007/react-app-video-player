@@ -1,53 +1,32 @@
-import React from "react";
-import youtube from "../repositories/youtube";
+import React, { useState, useEffect } from "react";
 import SearchBar from "./SearchBar/SearchBar";
 import VideoList from "./Video/VideoList";
 import VideoDetail from "./Video/VideoDetail";
+import useVideos from "../hooks/useVideos";
 
-class App extends React.Component {
-  state = { videos: [], selectedVideo: null };
+const App = () => {
+  const [selectedVideo, setSelectedVideo] = useState(null);
+  const [videos, search] = useVideos("Buildings");
 
-  componentDidMount() {
-    this.onSubmit("Buildings");
-  }
+  useEffect(() => {
+    setSelectedVideo(videos[0]);
+  }, [videos]);
 
-  onSubmit = async (term) => {
-    let results = await youtube.get("/search", {
-      params: {
-        q: term,
-      },
-    });
-
-    this.setState({
-      videos: results.data.items,
-      selectedVideo: results.data.items[0],
-    });
-  };
-
-  onVideoSelect = (video) => {
-    this.setState({ selectedVideo: video });
-  };
-
-  render() {
-    return (
-      <div className="ui container">
-        <SearchBar onSubmit={this.onSubmit} />
-        <div className="ui grid">
-          <div className="ui row">
-            <div className="ten wide column">
-              <VideoDetail video={this.state.selectedVideo} />
-            </div>
-            <div className="six wide column">
-              <VideoList
-                videos={this.state.videos}
-                onVideoSelect={this.onVideoSelect}
-              />
-            </div>
+  return (
+    <div className="ui container">
+      <SearchBar onSubmit={search} />
+      <div className="ui grid">
+        <div className="ui row">
+          <div className="ten wide column">
+            <VideoDetail video={selectedVideo} />
+          </div>
+          <div className="six wide column">
+            <VideoList videos={videos} onVideoSelect={setSelectedVideo} />
           </div>
         </div>
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
 
 export default App;
